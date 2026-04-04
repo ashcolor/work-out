@@ -12,15 +12,13 @@ export type WorkoutLog = {
   date: string;
 };
 
-export const TAG_COLORS: Record<string, string> = {
-  腹筋: "badge-warning",
-  肩: "badge-info",
-  胸筋: "badge-error",
-  脇腹: "badge-warning",
-  背筋: "badge-primary",
-  内もも: "badge-accent",
-  中殿筋: "badge-secondary",
-  もも筋: "badge-success",
-};
-
-export const ALL_TAGS = Object.keys(TAG_COLORS);
+export const ALL_TAGS = [
+  "肩",
+  "胸筋",
+  "背筋",
+  "腹筋",
+  "脇腹",
+  "中殿筋",
+  "もも筋",
+  "内もも",
+];

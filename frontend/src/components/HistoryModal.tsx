@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { fetchLogs, deleteLog } from "../api";
 import type { Exercise, WorkoutLog } from "../types";
 import { TagBadge } from "./TagBadge";
+import { formatRelativeDate } from "../utils/formatRelativeDate";
+import { formatWeight } from "../utils/formatWeight";
 
 type Props = {
   exercise: Exercise;
@@ -52,8 +54,8 @@ export function HistoryModal({ exercise, onClose }: Props) {
               <tbody>
                 {logs.map((log) => (
                   <tr key={log.id}>
-                    <td>{log.date}</td>
-                    <td>{log.weight != null ? `${log.weight} kg` : "-"}</td>
+                    <td>{formatRelativeDate(log.date)}</td>
+                    <td>{formatWeight(log.weight)}</td>
                     <td>{log.reps != null ? `${log.reps} 回` : "-"}</td>
                     <td>
                       <button

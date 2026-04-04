@@ -1,15 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchExercises, checkAuth, logout } from "./api";
+import { ALL_TAGS } from "./types";
 import type { Exercise } from "./types";
+import { AppHeader } from "./components/AppHeader";
+import { AppSidebar } from "./components/AppSidebar";
 import { ExerciseTable } from "./components/ExerciseTable";
 import { AddExerciseModal } from "./components/AddExerciseModal";
 import { LogModal } from "./components/LogModal";
 import { HistoryModal } from "./components/HistoryModal";
 import { LoginPage } from "./components/LoginPage";
 
+const TAG_ORDER = new Map(ALL_TAGS.map((tag, index) => [tag, index]));
+
 export default function App() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [logTarget, setLogTarget] = useState<Exercise | null>(null);
   const [historyTarget, setHistoryTarget] = useState<Exercise | null>(null);
@@ -20,7 +26,13 @@ export default function App() {
 
   const reload = useCallback(async () => {
     const data = await fetchExercises();
-    setExercises(data);
+    const sorted = [...data].sort((a, b) => {
+      const tagA = TAG_ORDER.get(a.tag) ?? Number.MAX_SAFE_INTEGER;
+      const tagB = TAG_ORDER.get(b.tag) ?? Number.MAX_SAFE_INTEGER;
+      if (tagA !== tagB) return tagA - tagB;
+      return a.name.localeCompare(b.name, "ja");
+    });
+    setExercises(sorted);
   }, []);
 
   useEffect(() => {
@@ -38,39 +50,42 @@ export default function App() {
   }
 
   const handleLogout = async () => {
+    setSidebarOpen(false);
     await logout();
     setAuthenticated(false);
   };
 
+  const handleOpenExercises = () => {
+    setSidebarOpen(false);
+    setShowAddExercise(true);
+  };
+
   return (
     <div className="min-h-screen bg-base-200">
-      <div className="max-w-3xl mx-auto p-4">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">筋トレ</h1>
-          <div className="flex gap-2">
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => setShowAddExercise(true)}
-            >
-              + 種目追加
-            </button>
-            <button className="btn btn-ghost btn-sm" onClick={handleLogout}>
-              ログアウト
-            </button>
-          </div>
-        </div>
+      <AppHeader
+        onMenuOpen={() => setSidebarOpen(true)}
+        onOpenExercises={handleOpenExercises}
+      />
+      <AppSidebar
+        open={sidebarOpen}
+        exerciseCount={exercises.length}
+        onClose={() => setSidebarOpen(false)}
+        onOpenExercises={handleOpenExercises}
+        onLogout={handleLogout}
+      />
 
+      <div className="max-w-3xl mx-auto p-4 sm:p-6">
         <ExerciseTable
           exercises={exercises}
           onLog={setLogTarget}
           onHistory={setHistoryTarget}
-          onDelete={reload}
         />
 
         {showAddExercise && (
           <AddExerciseModal
+            exercises={exercises}
             onClose={() => setShowAddExercise(false)}
-            onAdded={reload}
+            onChanged={reload}
           />
         )}
 
