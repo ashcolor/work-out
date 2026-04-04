@@ -1,0 +1,24 @@
+{
+  "name": "work-out",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:api": "wrangler dev --local --persist-to .wrangler/state",
+    "db:init": "wrangler d1 execute work-out-db --local --file=schema.sql",
+    "dev:front": "cd frontend && npx vite",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:front\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@hono/node-server": "^1.19.12",
+    "hono": "^4.12.10",
+    "wrangler": "^4.80.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260404.1"
+  }
+}
