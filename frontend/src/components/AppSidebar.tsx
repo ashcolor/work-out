@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { usePwaInstallPrompt } from "../utils/usePwaInstallPrompt";
 
 type Props = {
   open: boolean;
@@ -21,6 +22,14 @@ function SidebarIcon({
   );
 }
 
+function isIosBrowser() {
+  const ua = navigator.userAgent;
+  const isIosDevice = /iPhone|iPad|iPod/i.test(ua);
+  const isIpadOsDesktopMode = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+
+  return isIosDevice || isIpadOsDesktopMode;
+}
+
 export function AppSidebar({
   open,
   exerciseCount,
@@ -28,6 +37,11 @@ export function AppSidebar({
   onOpenExercises,
   onLogout,
 }: Props) {
+  const [showIosGuide, setShowIosGuide] = useState(false);
+  const isIos = isIosBrowser();
+  const { canInstall, isInstalled, promptInstall } = usePwaInstallPrompt();
+  const showInstallAction = !isInstalled && (canInstall || isIos);
+
   useEffect(() => {
     if (!open) return;
 
@@ -44,6 +58,18 @@ export function AppSidebar({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [open, onClose]);
+
+  const handleInstall = async () => {
+    if (!canInstall) {
+      if (isIos) {
+        setShowIosGuide(true);
+      }
+      return;
+    }
+
+    await promptInstall();
+    onClose();
+  };
 
   return (
     <>
@@ -64,11 +90,7 @@ export function AppSidebar({
       >
         <div className="flex items-center gap-3 border-b border-base-300 px-4 py-4">
           <div className="flex h-11 w-11 items-center justify-center">
-            <img
-              src="/workout-icon.svg"
-              alt=""
-              className="h-9 w-9 rounded-2xl"
-            />
+            <img src="/workout-icon.svg" alt="" className="h-9 w-9 rounded-2xl" />
           </div>
           <div>
             <div className="text-lg font-bold">筋トレ</div>
@@ -122,8 +144,8 @@ export function AppSidebar({
                 </SidebarIcon>
                 <div className="flex flex-1 items-center justify-between gap-3">
                   <div>
-                    <div className="font-medium">種目管理</div>
-                    <div className="text-xs text-base-content/50">一覧確認と追加</div>
+                    <div className="font-medium">種目追加</div>
+                    <div className="text-xs text-base-content/50">一覧へ追加して管理</div>
                   </div>
                   <div className="badge badge-outline">{exerciseCount}</div>
                 </div>
@@ -132,7 +154,27 @@ export function AppSidebar({
           </ul>
         </div>
 
-        <div className="mt-auto border-t border-base-300 p-4">
+        <div className="mt-auto space-y-3 border-t border-base-300 p-4">
+          {showInstallAction ? (
+            <button type="button" className="btn btn-primary w-full" onClick={handleInstall}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="h-4 w-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"
+                />
+              </svg>
+              {canInstall ? "アプリをインストール" : "ホーム画面に追加"}
+            </button>
+          ) : null}
+
           <button type="button" className="btn btn-ghost w-full justify-start" onClick={onLogout}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -152,6 +194,28 @@ export function AppSidebar({
           </button>
         </div>
       </aside>
+
+      <dialog className={`modal ${showIosGuide ? "modal-open" : ""}`}>
+        <div className="modal-box">
+          <h3 className="text-lg font-bold">iPhoneでの追加方法</h3>
+          <div className="mt-3 space-y-2 text-sm leading-6">
+            <p>Safari の共有メニューからホーム画面に追加できます。</p>
+            <p>1. 画面下の共有ボタンを押す</p>
+            <p>2. 「ホーム画面に追加」を選ぶ</p>
+            <p>3. 名前を確認して追加する</p>
+          </div>
+          <div className="modal-action">
+            <button type="button" className="btn" onClick={() => setShowIosGuide(false)}>
+              閉じる
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button type="button" onClick={() => setShowIosGuide(false)}>
+            close
+          </button>
+        </form>
+      </dialog>
     </>
   );
 }
