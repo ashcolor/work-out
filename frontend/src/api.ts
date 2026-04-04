@@ -2,6 +2,24 @@ import type { Exercise } from "./types";
 
 const BASE = "/api";
 
+export async function login(username: string, password: string): Promise<boolean> {
+  const res = await fetch(`${BASE}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  return res.ok;
+}
+
+export async function logout(): Promise<void> {
+  await fetch(`${BASE}/logout`, { method: "POST" });
+}
+
+export async function checkAuth(): Promise<boolean> {
+  const res = await fetch(`${BASE}/me`);
+  return res.ok;
+}
+
 export async function fetchExercises(): Promise<Exercise[]> {
   const res = await fetch(`${BASE}/exercises`);
   return res.json();

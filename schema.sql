@@ -20,6 +20,11 @@ CREATE TABLE workout_logs (
 
 CREATE INDEX idx_logs_exercise_date ON workout_logs(exercise_id, date DESC);
 
+CREATE TABLE sessions (
+  token TEXT PRIMARY KEY,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
 -- 初期データ
 INSERT INTO exercises (name, tag) VALUES
   ('アブドミナル', '腹筋'),

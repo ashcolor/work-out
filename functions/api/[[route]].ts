@@ -1,11 +1,65 @@
 import { Hono } from "hono";
 import { handle } from "hono/cloudflare-pages";
+import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 
 type Bindings = {
   DB: D1Database;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
+
+// --- 認証 ---
+
+const USERNAME = "ashcolor";
+const PASSWORD = "password";
+
+// 認証ミドルウェア（login/logout/me以外のAPIを保護）
+app.use("/api/*", async (c, next) => {
+  const path = new URL(c.req.url).pathname;
+  if (path === "/api/login" || path === "/api/logout" || path === "/api/me") {
+    return next();
+  }
+  const token = getCookie(c, "session");
+  if (!token) return c.json({ error: "Unauthorized" }, 401);
+  const row = await c.env.DB.prepare("SELECT token FROM sessions WHERE token = ?").bind(token).first();
+  if (!row) return c.json({ error: "Unauthorized" }, 401);
+  return next();
+});
+
+app.post("/api/login", async (c) => {
+  const { username, password } = await c.req.json();
+  if (username !== USERNAME || password !== PASSWORD) {
+    return c.json({ error: "Invalid credentials" }, 401);
+  }
+  const token = crypto.randomUUID();
+  await c.env.DB.prepare("INSERT INTO sessions (token) VALUES (?)").bind(token).run();
+  const isLocal = new URL(c.req.url).hostname === "localhost";
+  setCookie(c, "session", token, {
+    path: "/",
+    httpOnly: true,
+    secure: !isLocal,
+    sameSite: "Lax",
+    maxAge: 60 * 60 * 24 * 30,
+  });
+  return c.json({ ok: true });
+});
+
+app.post("/api/logout", async (c) => {
+  const token = getCookie(c, "session");
+  if (token) {
+    await c.env.DB.prepare("DELETE FROM sessions WHERE token = ?").bind(token).run();
+  }
+  deleteCookie(c, "session", { path: "/" });
+  return c.json({ ok: true });
+});
+
+app.get("/api/me", async (c) => {
+  const token = getCookie(c, "session");
+  if (!token) return c.json({ authenticated: false }, 401);
+  const row = await c.env.DB.prepare("SELECT token FROM sessions WHERE token = ?").bind(token).first();
+  if (!row) return c.json({ authenticated: false }, 401);
+  return c.json({ authenticated: true, username: USERNAME });
+});
 
 // --- 種目 ---
 
