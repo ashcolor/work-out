@@ -1,0 +1,27 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="28" y1="20" x2="232" y2="236" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF8A00" />
+      <stop offset="1" stop-color="#FF4D4F" />
+    </linearGradient>
+    <linearGradient id="shine" x1="72" y1="56" x2="192" y2="192" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.4" />
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="232" height="232" rx="56" fill="url(#bg)" />
+  <circle cx="74" cy="66" r="34" fill="url(#shine)" />
+  <circle cx="198" cy="194" r="26" fill="#0F172A" fill-opacity="0.1" />
+  <g transform="rotate(-18 128 128)">
+    <rect x="82" y="116" width="92" height="24" rx="12" fill="#FFF7ED" />
+    <rect x="70" y="110" width="10" height="36" rx="5" fill="#FFF7ED" />
+    <rect x="56" y="104" width="10" height="48" rx="5" fill="#FFF7ED" />
+    <rect x="42" y="96" width="10" height="64" rx="5" fill="#FFF7ED" />
+    <rect x="176" y="110" width="10" height="36" rx="5" fill="#FFF7ED" />
+    <rect x="190" y="104" width="10" height="48" rx="5" fill="#FFF7ED" />
+    <rect x="204" y="96" width="10" height="64" rx="5" fill="#FFF7ED" />
+    <rect x="78" y="112" width="4" height="32" rx="2" fill="#FDBA74" />
+    <rect x="174" y="112" width="4" height="32" rx="2" fill="#FDBA74" />
+  </g>
+  <path d="M170 64L175.5 75.5L187 81L175.5 86.5L170 98L164.5 86.5L153 81L164.5 75.5L170 64Z" fill="#FFF7ED" />
+</svg>

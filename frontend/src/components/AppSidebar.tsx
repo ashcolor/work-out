@@ -63,17 +63,12 @@ export function AppSidebar({
         aria-hidden={!open}
       >
         <div className="flex items-center gap-3 border-b border-base-300 px-4 py-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral text-neutral-content">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="h-5 w-5"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 6h8M7 12h10M9 18h6" />
-            </svg>
+          <div className="flex h-11 w-11 items-center justify-center">
+            <img
+              src="/workout-icon.svg"
+              alt=""
+              className="h-9 w-9 rounded-2xl"
+            />
           </div>
           <div>
             <div className="text-lg font-bold">筋トレ</div>

@@ -26,7 +26,7 @@ export function AppHeader({ onMenuOpen, onOpenExercises }: Props) {
         </button>
       </div>
       <div className="flex-1">
-        <div className="text-lg font-bold">筋トレ</div>
+        <div className="text-lg font-bold">筋トレ記録</div>
       </div>
       <div className="flex-none">
         <button
@@ -34,7 +34,7 @@ export function AppHeader({ onMenuOpen, onOpenExercises }: Props) {
           className="btn btn-primary btn-sm hidden sm:inline-flex"
           onClick={onOpenExercises}
         >
-          種目
+          種目追加
         </button>
       </div>
     </header>
