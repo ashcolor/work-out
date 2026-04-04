@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:api": "wrangler dev --local --persist-to .wrangler/state",
-    "db:init": "wrangler d1 execute work-out-db --local --file=schema.sql",
-    "dev:front": "cd frontend && npx vite",
-    "dev": "concurrently \"npm run dev:api\" \"npm run dev:front\""
+    "dev": "wrangler pages dev",
+    "build": "cd frontend && npm run build",
+    "deploy": "npm run build && wrangler pages deploy",
+    "db:init": "wrangler d1 execute work-out --local --file=schema.sql",
+    "db:init:remote": "wrangler d1 execute work-out --remote --file=schema.sql"
   },
   "keywords": [],
   "author": "",
