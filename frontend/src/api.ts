@@ -1,4 +1,4 @@
-import type { Exercise } from "./types";
+import type { BodyPart, Exercise } from "./types";
 
 const BASE = "/api";
 
@@ -20,16 +20,21 @@ export async function checkAuth(): Promise<boolean> {
   return res.ok;
 }
 
+export async function fetchBodyParts(): Promise<BodyPart[]> {
+  const res = await fetch(`${BASE}/body-parts`);
+  return res.json();
+}
+
 export async function fetchExercises(): Promise<Exercise[]> {
   const res = await fetch(`${BASE}/exercises`);
   return res.json();
 }
 
-export async function addExercise(name: string, tag: string) {
+export async function addExercise(name: string, bodyPartId: number) {
   const res = await fetch(`${BASE}/exercises`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, tag }),
+    body: JSON.stringify({ name, bodyPartId }),
   });
   return res.json();
 }

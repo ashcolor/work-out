@@ -1,43 +1,56 @@
 # work-out
 
-筋トレ記録アプリ。Cloudflare Pages + Hono + D1 + React で構成。
+Cloudflare Pages + Hono + D1 + React で作った筋トレ記録アプリです。
 
-## セットアップ
+## Setup
 
 ```bash
 npm install
 cd frontend && npm install
 ```
 
-## DB初期化
+## DB commands
+
+既存データがあるDBでは、先にバックアップを取ってから `db:migrate:*` を使ってください。
 
 ```bash
-# ローカル
-npm run db:init
+# Backup only
+npm run db:backup:local
+npm run db:backup:remote
 
-# リモート
-npm run db:init:remote
+# Safe bootstrap for an empty DB
+npm run db:setup:local
+npm run db:setup:remote
+
+# Safe migration for an existing DB
+npm run db:migrate:local
+npm run db:migrate:remote
 ```
 
-## 開発
+補足:
 
-ターミナルを2つ使って、それぞれ起動する。
+- `db:backup:*` は `backups/` に SQL エクスポートを作成します
+- `db:migrate:*` は最初にバックアップを取り、その後でスキーマを確認して必要な処理だけを行います
+- `db:init` / `db:init:remote` は互換のため残していますが、中身は安全な `db:setup:*` です
+- 旧来のような `DROP TABLE` ベースの初期化は行いません
+
+## Local development
 
 ```bash
-# 1. APIサーバー（wrangler pages dev）
+# API
 npx wrangler pages dev
 
-# 2. フロントエンド（Vite）
+# Frontend
 cd frontend && npm run dev
 ```
 
-Vite（ポート5173）からAPIリクエストがwrangler（ポート8788）にプロキシされる。
+Vite は `1737` 番ポート、API は `8788` 番ポートでの利用を想定しています。
 
-## 認証
+## Auth
 
-Cookie ベースのセッション認証。ログイン画面でユーザー名・パスワードを入力する。
+Cookie ベースのセッション認証です。ログイン画面からユーザー名とパスワードを入力します。
 
-## デプロイ
+## Deploy
 
 ```bash
 npm run deploy
