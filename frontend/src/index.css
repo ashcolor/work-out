@@ -4,4 +4,30 @@
 :root {
   --color-primary: #ff6a2a;
   --color-primary-content: #fff7ed;
+  --color-plus: #3b82f6;
+  --color-minus: #ef4444;
+}
+
+.step-adjust-plus {
+  border-color: color-mix(in srgb, var(--color-plus) 22%, transparent);
+  background-color: color-mix(in srgb, var(--color-plus) 14%, white);
+  color: var(--color-plus);
+}
+
+.step-adjust-plus:hover,
+.step-adjust-plus:focus-visible {
+  border-color: color-mix(in srgb, var(--color-plus) 30%, transparent);
+  background-color: color-mix(in srgb, var(--color-plus) 20%, white);
+}
+
+.step-adjust-minus {
+  border-color: color-mix(in srgb, var(--color-minus) 22%, transparent);
+  background-color: color-mix(in srgb, var(--color-minus) 14%, white);
+  color: var(--color-minus);
+}
+
+.step-adjust-minus:hover,
+.step-adjust-minus:focus-visible {
+  border-color: color-mix(in srgb, var(--color-minus) 30%, transparent);
+  background-color: color-mix(in srgb, var(--color-minus) 20%, white);
 }

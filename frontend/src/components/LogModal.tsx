@@ -127,7 +127,7 @@ export function LogModal({ exercise, onClose, onAdded }: Props) {
                 <button
                   key={`plus-${delta}`}
                   type="button"
-                  className="btn btn-sm btn-primary btn-soft min-w-0 flex-1 whitespace-nowrap"
+                  className="step-adjust-plus btn btn-sm btn-soft min-w-0 flex-1 whitespace-nowrap"
                   onClick={() => handleAdjustWeight(delta)}
                 >
                   <StepIcon type="plus" />
@@ -140,11 +140,11 @@ export function LogModal({ exercise, onClose, onAdded }: Props) {
                 <button
                   key={`minus-${delta}`}
                   type="button"
-                  className="btn btn-sm btn-error btn-soft min-w-0 flex-1 whitespace-nowrap"
+                  className="step-adjust-minus btn btn-xs btn-soft min-w-0 flex-1 whitespace-nowrap"
                   onClick={() => handleAdjustWeight(-delta)}
                 >
                   <StepIcon type="minus" />
-                  <span className="text-base font-semibold">{delta}</span>
+                  <span className="text-sm font-semibold">{delta}</span>
                 </button>
               ))}
             </div>
