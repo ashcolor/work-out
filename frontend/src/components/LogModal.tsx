@@ -1,3 +1,4 @@
+import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { addLog } from "../api";
 import type { Exercise } from "../types";
@@ -26,21 +27,10 @@ function formatWeightValue(value: number) {
 
 function StepIcon({ type }: { type: "plus" | "minus" }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className={`h-4 w-4 shrink-0 ${type === "plus" ? "" : "h-3.5 w-3.5"}`}
-    >
-      <circle cx="12" cy="12" r="9" />
-      {type === "plus" ? (
-        <path strokeLinecap="round" d="M12 8v8M8 12h8" />
-      ) : (
-        <path strokeLinecap="round" d="M8 12h8" />
-      )}
-    </svg>
+    <Icon
+      icon={type === "plus" ? "lucide:circle-plus" : "lucide:circle-minus"}
+      className={`shrink-0 ${type === "plus" ? "size-4" : "size-3.5"}`}
+    />
   );
 }
 
@@ -65,18 +55,11 @@ export function LogModal({ exercise, onClose, onAdded }: Props) {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    await addLog(
-      exercise.id,
-      weight === "" ? null : Number(weight),
-      null,
-      date
-    );
+    await addLog(exercise.id, weight === "" ? null : Number(weight), null, date);
 
     onAdded();
     onClose();
   };
-
-  const hasPreviousWeight = getInitialWeight(exercise) !== "";
 
   return (
     <dialog className="modal modal-open">

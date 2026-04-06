@@ -1,3 +1,4 @@
+import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
 import { usePwaInstallPrompt } from "../utils/usePwaInstallPrompt";
 
@@ -91,16 +92,7 @@ export function AppSidebar({
             onClick={onClose}
             aria-label="閉じる"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="h-4 w-4"
-            >
-              <path strokeLinecap="round" d="M6 6l12 12M18 6 6 18" />
-            </svg>
+            <Icon icon="lucide:x" className="size-4" />
           </button>
         </div>
 
@@ -142,39 +134,13 @@ export function AppSidebar({
         <div className="mt-auto space-y-3 border-t border-base-300 p-4">
           {showInstallAction ? (
             <button type="button" className="btn btn-primary w-full" onClick={handleInstall}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="h-4 w-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"
-                />
-              </svg>
+              <Icon icon="lucide:download" className="size-4" />
               {canInstall ? "アプリをインストール" : "ホーム画面に追加"}
             </button>
           ) : null}
 
           <button type="button" className="btn btn-ghost w-full justify-start" onClick={onLogout}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="h-4 w-4"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 16l4-4m0 0-4-4m4 4H9m6 7H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h8"
-              />
-            </svg>
+            <Icon icon="lucide:log-out" className="size-4" />
             ログアウト
           </button>
         </div>
@@ -182,12 +148,12 @@ export function AppSidebar({
 
       <dialog className={`modal ${showIosGuide ? "modal-open" : ""}`}>
         <div className="modal-box">
-          <h3 className="text-lg font-bold">iPhoneでの追加方法</h3>
+          <h3 className="text-lg font-bold">iPhoneでのインストール方法</h3>
           <div className="mt-3 space-y-2 text-sm leading-6">
             <p>Safari の共有メニューからホーム画面に追加できます。</p>
             <p>1. 画面下の共有ボタンを押す</p>
             <p>2. 「ホーム画面に追加」を選ぶ</p>
-            <p>3. 名前を確認して追加する</p>
+            <p>3. 内容を確認して追加する</p>
           </div>
           <div className="modal-action">
             <button type="button" className="btn" onClick={() => setShowIosGuide(false)}>

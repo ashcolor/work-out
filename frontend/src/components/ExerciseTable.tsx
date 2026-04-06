@@ -1,3 +1,4 @@
+import { Icon } from "@iconify/react";
 import type { KeyboardEvent } from "react";
 import type { Exercise, WorkoutLog } from "../types";
 import { SectionLabel } from "./SectionLabel";
@@ -58,45 +59,7 @@ export function ExerciseTable({ exercises, onLog, onHistory }: Props) {
                       onLog(exercise);
                     }}
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      className="h-4.5 w-4.5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4 7a3 3 0 0 1 3-3h6"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M7 20a3 3 0 0 1-3-3V7"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M17 20H7"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M20 13v4a3 3 0 0 1-3 3"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M14.5 5.5 18.5 9.5"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12.5 17.5 18.8 11.2a2.12 2.12 0 1 0-3-3l-6.3 6.3L8.8 18l3.7-.5Z"
-                      />
-                    </svg>
+                    <Icon icon="lucide:square-pen" className="size-[18px]" />
                   </button>
 
                   <div className="w-full pr-10">

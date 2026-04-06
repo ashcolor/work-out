@@ -1,3 +1,4 @@
+import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -10,8 +11,8 @@ import {
 } from "recharts";
 import { deleteLog, fetchLogs } from "../api";
 import type { Exercise, WorkoutLog } from "../types";
-import { TagBadge } from "./TagBadge";
 import { formatWeight } from "../utils/formatWeight";
+import { TagBadge } from "./TagBadge";
 
 type Props = {
   exercise: Exercise;
@@ -93,10 +94,7 @@ function WeightChart({ logs }: { logs: LogEntry[] }) {
       </div>
       <div className="h-40 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={chartData}
-            margin={{ top: 8, right: 8, left: 4, bottom: 0 }}
-          >
+          <LineChart data={chartData} margin={{ top: 8, right: 8, left: 4, bottom: 0 }}>
             <CartesianGrid stroke="currentColor" strokeOpacity={0.08} vertical={false} />
             <XAxis
               dataKey="shortDate"
@@ -201,31 +199,7 @@ export function HistoryModal({ exercise, onClose }: Props) {
                               title="削除"
                               onClick={() => handleDelete(log.id)}
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                className="h-4 w-4"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M3 6h18"
-                                />
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M8 6V4h8v2"
-                                />
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M19 6l-1 14H6L5 6"
-                                />
-                                <path strokeLinecap="round" d="M10 11v6M14 11v6" />
-                              </svg>
+                              <Icon icon="lucide:trash-2" className="size-4" />
                             </button>
                           </td>
                         </tr>

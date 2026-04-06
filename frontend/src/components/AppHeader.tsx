@@ -1,3 +1,5 @@
+import { Icon } from "@iconify/react";
+
 type Props = {
   onMenuOpen: () => void;
   onOpenExercises: () => void;
@@ -11,18 +13,9 @@ export function AppHeader({ onMenuOpen, onOpenExercises }: Props) {
           type="button"
           className="btn btn-square btn-ghost"
           onClick={onMenuOpen}
-          aria-label="メニュー"
+          aria-label="メニューを開く"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="h-5 w-5"
-          >
-            <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
+          <Icon icon="lucide:menu" className="size-5" />
         </button>
       </div>
       <div className="flex-1">
