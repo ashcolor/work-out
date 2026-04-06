@@ -131,7 +131,6 @@ export function LogModal({ exercise, onClose, onAdded }: Props) {
                 className="input input-bordered w-full px-4 py-3 pr-14 text-right text-3xl font-bold tracking-tight"
                 value={weight}
                 onChange={(event) => setWeight(event.target.value)}
-                autoFocus
               />
               <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm font-medium text-base-content/60">
                 kg
