@@ -28,18 +28,19 @@ CREATE TABLE IF NOT EXISTS sessions (
   created_at TEXT DEFAULT (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_logs_exercise_date ON workout_logs(exercise_id, date DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_exercises_name_body_part
+  ON exercises(name, body_part_id);
+
+CREATE INDEX IF NOT EXISTS idx_logs_exercise_date
+  ON workout_logs(exercise_id, date DESC);
 
 INSERT OR IGNORE INTO body_parts (name, sort_order) VALUES
   ('肩', 1),
-  ('胸筋', 2),
-  ('背筋', 3),
-  ('腹筋', 4),
-  ('脇腹', 5),
-  ('中殿筋', 6),
-  ('もも筋', 7),
-  ('内もも', 8),
-  ('足全体', 9);
+  ('胸', 2),
+  ('腕', 3),
+  ('背筋', 4),
+  ('腹', 5),
+  ('脚', 6);
 
 INSERT INTO exercises (name, body_part_id)
 SELECT 'ラットプル', body_parts.id
@@ -55,7 +56,7 @@ WHERE body_parts.name = '背筋'
 INSERT INTO exercises (name, body_part_id)
 SELECT 'チェストプレス', body_parts.id
 FROM body_parts
-WHERE body_parts.name = '胸筋'
+WHERE body_parts.name = '胸'
   AND NOT EXISTS (
     SELECT 1
     FROM exercises
@@ -66,7 +67,7 @@ WHERE body_parts.name = '胸筋'
 INSERT INTO exercises (name, body_part_id)
 SELECT 'トルソローテーション', body_parts.id
 FROM body_parts
-WHERE body_parts.name = '脇腹'
+WHERE body_parts.name = '腹'
   AND NOT EXISTS (
     SELECT 1
     FROM exercises
@@ -77,7 +78,7 @@ WHERE body_parts.name = '脇腹'
 INSERT INTO exercises (name, body_part_id)
 SELECT 'レッグエクステンション', body_parts.id
 FROM body_parts
-WHERE body_parts.name = 'もも筋'
+WHERE body_parts.name = '脚'
   AND NOT EXISTS (
     SELECT 1
     FROM exercises
@@ -110,7 +111,7 @@ WHERE body_parts.name = '背筋'
 INSERT INTO exercises (name, body_part_id)
 SELECT 'アブドミナル', body_parts.id
 FROM body_parts
-WHERE body_parts.name = '腹筋'
+WHERE body_parts.name = '腹'
   AND NOT EXISTS (
     SELECT 1
     FROM exercises
@@ -121,7 +122,7 @@ WHERE body_parts.name = '腹筋'
 INSERT INTO exercises (name, body_part_id)
 SELECT 'レッグプレス', body_parts.id
 FROM body_parts
-WHERE body_parts.name = '足全体'
+WHERE body_parts.name = '脚'
   AND NOT EXISTS (
     SELECT 1
     FROM exercises
@@ -132,7 +133,7 @@ WHERE body_parts.name = '足全体'
 INSERT INTO exercises (name, body_part_id)
 SELECT 'ヒップアダクター', body_parts.id
 FROM body_parts
-WHERE body_parts.name = '内もも'
+WHERE body_parts.name = '脚'
   AND NOT EXISTS (
     SELECT 1
     FROM exercises
@@ -143,7 +144,7 @@ WHERE body_parts.name = '内もも'
 INSERT INTO exercises (name, body_part_id)
 SELECT 'ヒップアブダクター', body_parts.id
 FROM body_parts
-WHERE body_parts.name = '中殿筋'
+WHERE body_parts.name = '脚'
   AND NOT EXISTS (
     SELECT 1
     FROM exercises
@@ -176,7 +177,7 @@ WHERE body_parts.name = '背筋'
 INSERT INTO exercises (name, body_part_id)
 SELECT 'レッグカール', body_parts.id
 FROM body_parts
-WHERE body_parts.name = 'もも筋'
+WHERE body_parts.name = '脚'
   AND NOT EXISTS (
     SELECT 1
     FROM exercises
@@ -187,7 +188,7 @@ WHERE body_parts.name = 'もも筋'
 INSERT INTO exercises (name, body_part_id)
 SELECT 'ベンチプレス', body_parts.id
 FROM body_parts
-WHERE body_parts.name = '胸筋'
+WHERE body_parts.name = '胸'
   AND NOT EXISTS (
     SELECT 1
     FROM exercises

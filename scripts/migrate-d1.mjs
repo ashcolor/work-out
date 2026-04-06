@@ -4,6 +4,7 @@ import path from "node:path";
 
 const target = process.argv[2];
 const npxBin = process.platform === "win32" ? "npx.exe" : "npx";
+const desiredBodyParts = ["肩", "胸", "腕", "背筋", "腹", "脚"];
 
 if (target !== "local" && target !== "remote") {
   console.error("Usage: node scripts/migrate-d1.mjs <local|remote>");
@@ -51,10 +52,22 @@ function backupFirst() {
 
 backupFirst();
 
-const tables = queryJson("SELECT name FROM sqlite_master WHERE type = 'table'");
-const tableNames = new Set(tables.map((row) => row.name));
-const hasExercises = tableNames.has("exercises");
-const hasBodyParts = tableNames.has("body_parts");
+function getSchemaState() {
+  const tables = queryJson("SELECT name FROM sqlite_master WHERE type = 'table'");
+  const tableNames = new Set(tables.map((row) => row.name));
+  const hasExercises = tableNames.has("exercises");
+  const hasBodyParts = tableNames.has("body_parts");
+  const columns = hasExercises ? queryJson("PRAGMA table_info(exercises)") : [];
+  const columnNames = new Set(columns.map((row) => row.name));
+
+  return {
+    hasExercises,
+    hasBodyParts,
+    columnNames,
+  };
+}
+
+let { hasExercises, hasBodyParts, columnNames } = getSchemaState();
 
 if (!hasExercises) {
   console.log("No exercises table found. Applying safe bootstrap schema.");
@@ -62,28 +75,54 @@ if (!hasExercises) {
   process.exit(0);
 }
 
-const columns = queryJson("PRAGMA table_info(exercises)");
-const columnNames = new Set(columns.map((row) => row.name));
 const isNewSchema = hasBodyParts && columnNames.has("body_part_id");
 const isOldSchema = columnNames.has("tag") && !columnNames.has("body_part_id");
 
-if (isNewSchema) {
+if (!isOldSchema) {
+  if (!isNewSchema) {
+    console.error("Unknown exercises schema. Migration aborted without changing data.");
+    process.exit(1);
+  }
+} else {
+  const migrationPath = path.join("migrations", "0001_body-parts.sql");
+  const migrationSql = readFileSync(migrationPath, "utf8");
+
+  if (!migrationSql.trim()) {
+    console.error("Migration file is empty.");
+    process.exit(1);
+  }
+
+  console.log("Old schema detected. Applying non-destructive body part migration.");
+  runWrangler(["d1", "execute", "work-out", `--${target}`, "--file", migrationPath]);
+
+  ({ hasExercises, hasBodyParts, columnNames } = getSchemaState());
+}
+
+const hasConsolidatedSchema = hasBodyParts && columnNames.has("body_part_id");
+
+if (!hasConsolidatedSchema) {
+  console.error("Body part schema could not be verified after migration.");
+  process.exit(1);
+}
+
+const bodyParts = queryJson("SELECT name FROM body_parts ORDER BY sort_order, name");
+const currentBodyParts = bodyParts.map((row) => row.name);
+const needsConsolidation =
+  currentBodyParts.length !== desiredBodyParts.length ||
+  currentBodyParts.some((name) => !desiredBodyParts.includes(name));
+
+if (!needsConsolidation) {
   console.log("Database is already migrated. No changes applied.");
   process.exit(0);
 }
 
-if (!isOldSchema) {
-  console.error("Unknown exercises schema. Migration aborted without changing data.");
+const consolidationPath = path.join("migrations", "0002_consolidate-body-parts.sql");
+const consolidationSql = readFileSync(consolidationPath, "utf8");
+
+if (!consolidationSql.trim()) {
+  console.error("Consolidation migration file is empty.");
   process.exit(1);
 }
 
-const migrationPath = path.join("migrations", "0001_body-parts.sql");
-const migrationSql = readFileSync(migrationPath, "utf8");
-
-if (!migrationSql.trim()) {
-  console.error("Migration file is empty.");
-  process.exit(1);
-}
-
-console.log("Old schema detected. Applying non-destructive body part migration.");
-runWrangler(["d1", "execute", "work-out", `--${target}`, "--file", migrationPath]);
+console.log("Applying consolidated body part migration.");
+runWrangler(["d1", "execute", "work-out", `--${target}`, "--file", consolidationPath]);
