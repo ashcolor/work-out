@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { addExercise } from "../api";
-import type { BodyPart } from "../types";
+import type { BodyPart, Exercise } from "../types";
 
 type Props = {
   bodyParts: BodyPart[];
   onClose: () => void;
-  onChanged: () => Promise<void>;
+  onAdded: (exercise: Exercise) => void;
 };
 
-export function AddExerciseModal({ bodyParts, onClose, onChanged }: Props) {
+export function AddExerciseModal({ bodyParts, onClose, onAdded }: Props) {
   const [name, setName] = useState("");
   const [bodyPartId, setBodyPartId] = useState<number>(bodyParts[0]?.id ?? 0);
   const hasBodyParts = bodyParts.length > 0;
@@ -25,14 +25,12 @@ export function AddExerciseModal({ bodyParts, onClose, onChanged }: Props) {
     }
   }, [bodyPartId, bodyParts, hasBodyParts]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!name.trim() || !bodyPartId) return;
 
-    await addExercise(name.trim(), bodyPartId);
-    setName("");
-    await onChanged();
-    onClose();
+    const created = await addExercise(name.trim(), bodyPartId);
+    onAdded({ ...created, recentLogs: [] });
   };
 
   return (
@@ -45,13 +43,13 @@ export function AddExerciseModal({ bodyParts, onClose, onChanged }: Props) {
             placeholder="種目名"
             className="input input-bordered w-full"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(event) => setName(event.target.value)}
             autoFocus
           />
           <select
             className="select select-bordered w-full"
             value={bodyPartId}
-            onChange={(e) => setBodyPartId(Number(e.target.value))}
+            onChange={(event) => setBodyPartId(Number(event.target.value))}
             disabled={!hasBodyParts}
           >
             {bodyParts.map((bodyPart) => (
@@ -60,9 +58,7 @@ export function AddExerciseModal({ bodyParts, onClose, onChanged }: Props) {
               </option>
             ))}
           </select>
-          {!hasBodyParts && (
-            <div className="text-sm text-error">部位マスタが未登録です</div>
-          )}
+          {!hasBodyParts && <div className="text-sm text-error">部位マスタが未登録です</div>}
           <div className="modal-action">
             <button type="button" className="btn" onClick={onClose}>
               閉じる
