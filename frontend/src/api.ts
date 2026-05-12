@@ -1,46 +1,43 @@
-import type { BodyPart, Exercise } from "./types";
-
-const BASE = "/api";
-
-export async function login(username: string, password: string): Promise<boolean> {
-  const res = await fetch(`${BASE}/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
-  return res.ok;
-}
-
-export async function logout(): Promise<void> {
-  await fetch(`${BASE}/logout`, { method: "POST" });
-}
-
-export async function checkAuth(): Promise<boolean> {
-  const res = await fetch(`${BASE}/me`);
-  return res.ok;
-}
+import type { BodyPart, Exercise, WorkoutLog } from "./types";
+import { buildExerciseList, loadData, nextId, saveData, type StoredLog } from "./storage";
 
 export async function fetchBodyParts(): Promise<BodyPart[]> {
-  const res = await fetch(`${BASE}/body-parts`);
-  return res.json();
+  const data = loadData();
+  return [...data.bodyParts].sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
 export async function fetchExercises(): Promise<Exercise[]> {
-  const res = await fetch(`${BASE}/exercises`);
-  return res.json();
+  return buildExerciseList(loadData());
 }
 
 export async function addExercise(name: string, bodyPartId: number) {
-  const res = await fetch(`${BASE}/exercises`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, bodyPartId }),
-  });
-  return res.json();
+  const data = loadData();
+  const bodyPart = data.bodyParts.find((bp) => bp.id === bodyPartId);
+  if (!bodyPart) {
+    throw new Error("Invalid body part");
+  }
+
+  const created = {
+    id: nextId(data.exercises),
+    name,
+    bodyPartId,
+  };
+  data.exercises.push(created);
+  saveData(data);
+
+  return {
+    id: created.id,
+    name: created.name,
+    bodyPartId: created.bodyPartId,
+    tag: bodyPart.name,
+  };
 }
 
 export async function deleteExercise(id: number) {
-  await fetch(`${BASE}/exercises/${id}`, { method: "DELETE" });
+  const data = loadData();
+  data.exercises = data.exercises.filter((exercise) => exercise.id !== id);
+  data.logs = data.logs.filter((log) => log.exerciseId !== id);
+  saveData(data);
 }
 
 export async function addLog(
@@ -49,17 +46,29 @@ export async function addLog(
   reps: number | null,
   date: string
 ) {
-  const res = await fetch(`${BASE}/logs/${exerciseId}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ weight, reps, date }),
-  });
-  return res.json();
+  const data = loadData();
+  const created: StoredLog = {
+    id: nextId(data.logs),
+    exerciseId,
+    weight,
+    reps,
+    date,
+  };
+  data.logs.push(created);
+  saveData(data);
+  return { id: created.id };
 }
 
-export async function fetchLogs(exerciseId: number) {
-  const res = await fetch(`${BASE}/logs/${exerciseId}`);
-  return res.json();
+export async function fetchLogs(exerciseId: number): Promise<Array<WorkoutLog & { id: number }>> {
+  const data = loadData();
+  return data.logs
+    .filter((log) => log.exerciseId === exerciseId)
+    .sort((a, b) => {
+      const dateDiff = b.date.localeCompare(a.date);
+      if (dateDiff !== 0) return dateDiff;
+      return b.id - a.id;
+    })
+    .map(({ id, weight, reps, date }) => ({ id, weight, reps, date }));
 }
 
 export async function updateLog(
@@ -68,14 +77,20 @@ export async function updateLog(
   reps: number | null,
   date: string
 ) {
-  const res = await fetch(`${BASE}/logs/entry/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ weight, reps, date }),
-  });
-  return res.json();
+  const data = loadData();
+  const target = data.logs.find((log) => log.id === id);
+  if (!target) {
+    throw new Error("Log not found");
+  }
+  target.weight = weight;
+  target.reps = reps;
+  target.date = date;
+  saveData(data);
+  return { ok: true };
 }
 
 export async function deleteLog(id: number) {
-  await fetch(`${BASE}/logs/entry/${id}`, { method: "DELETE" });
+  const data = loadData();
+  data.logs = data.logs.filter((log) => log.id !== id);
+  saveData(data);
 }

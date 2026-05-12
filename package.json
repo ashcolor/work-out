@@ -4,27 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "wrangler pages dev",
+    "dev": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
-    "deploy": "npm run build && wrangler pages deploy",
-    "db:backup:local": "node scripts/backup-d1.mjs local",
-    "db:backup:remote": "node scripts/backup-d1.mjs remote",
-    "db:setup:local": "npx wrangler d1 execute work-out --local --file=schema.sql",
-    "db:setup:remote": "npx wrangler d1 execute work-out --remote --file=schema.sql",
-    "db:migrate:local": "node scripts/migrate-d1.mjs local",
-    "db:migrate:remote": "node scripts/migrate-d1.mjs remote",
-    "db:init": "npm run db:setup:local",
-    "db:init:remote": "npm run db:setup:remote"
+    "deploy": "npm run build && wrangler pages deploy frontend/dist"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "dependencies": {
-    "hono": "^4.12.10",
-    "wrangler": "^4.80.0"
-  },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260404.1"
+    "wrangler": "^4.80.0"
   }
 }

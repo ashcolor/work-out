@@ -8,7 +8,7 @@ type Props = {
   onOpenRecords: () => void;
   onOpenBodyParts: () => void;
   onOpenExercises: () => void;
-  onLogout: () => void;
+  onOpenDataManagement: () => void;
 };
 
 function isIosBrowser() {
@@ -25,7 +25,7 @@ export function AppSidebar({
   onOpenRecords,
   onOpenBodyParts,
   onOpenExercises,
-  onLogout,
+  onOpenDataManagement,
 }: Props) {
   const [showIosGuide, setShowIosGuide] = useState(false);
   const isIos = isIosBrowser();
@@ -139,9 +139,13 @@ export function AppSidebar({
             </button>
           ) : null}
 
-          <button type="button" className="btn btn-ghost w-full justify-start" onClick={onLogout}>
-            <Icon icon="lucide:log-out" className="size-4" />
-            ログアウト
+          <button
+            type="button"
+            className="btn btn-ghost w-full justify-start"
+            onClick={onOpenDataManagement}
+          >
+            <Icon icon="lucide:database" className="size-4" />
+            データ管理
           </button>
         </div>
       </aside>
