@@ -201,6 +201,28 @@ app.post("/api/logs/:exerciseId", async (c) => {
   return c.json({ id: result.meta.last_row_id }, 201);
 });
 
+app.put("/api/logs/entry/:id", async (c) => {
+  const id = c.req.param("id");
+  const { weight, reps, date } = await c.req.json();
+  if (!date) return c.json({ error: "date is required" }, 400);
+
+  const existingLog = await c.env.DB.prepare("SELECT id FROM workout_logs WHERE id = ?")
+    .bind(id)
+    .first<{ id: number }>();
+
+  if (!existingLog) {
+    return c.json({ error: "Log not found" }, 404);
+  }
+
+  await c.env.DB.prepare(
+    "UPDATE workout_logs SET weight = ?, reps = ?, date = ? WHERE id = ?"
+  )
+    .bind(weight ?? null, reps ?? null, date, id)
+    .run();
+
+  return c.json({ ok: true });
+});
+
 app.delete("/api/logs/entry/:id", async (c) => {
   const id = c.req.param("id");
   await c.env.DB.prepare("DELETE FROM workout_logs WHERE id = ?").bind(id).run();

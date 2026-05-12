@@ -1,17 +1,14 @@
-import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { addLog } from "../api";
-import type { Exercise } from "../types";
+import type { Exercise, WorkoutLog } from "../types";
 import { formatRelativeDate } from "../utils/formatRelativeDate";
 import { formatWeight } from "../utils/formatWeight";
 
 type Props = {
   exercise: Exercise;
   onClose: () => void;
-  onAdded: () => void;
+  onAdded: (log: WorkoutLog & { id: number }) => void;
 };
-
-const WEIGHT_STEP_OPTIONS = [2.5, 5, 7.5, 10];
 
 function getLocalToday() {
   const now = new Date();
@@ -25,15 +22,6 @@ function formatWeightValue(value: number) {
   return value.toFixed(2).replace(/\.?0+$/, "");
 }
 
-function StepIcon({ type }: { type: "plus" | "minus" }) {
-  return (
-    <Icon
-      icon={type === "plus" ? "lucide:circle-plus" : "lucide:circle-minus"}
-      className={`shrink-0 ${type === "plus" ? "size-4" : "size-3.5"}`}
-    />
-  );
-}
-
 function getInitialWeight(exercise: Exercise) {
   const latestWeight = exercise.recentLogs.find((log) => log.weight != null)?.weight;
   return latestWeight != null ? formatWeightValue(latestWeight) : "";
@@ -44,20 +32,18 @@ export function LogModal({ exercise, onClose, onAdded }: Props) {
   const [weight, setWeight] = useState(getInitialWeight(exercise));
   const recentLogs = exercise.recentLogs.slice(0, 3);
 
-  const handleAdjustWeight = (delta: number) => {
-    const base = weight === "" ? 0 : Number(weight);
-    if (Number.isNaN(base)) return;
-
-    const next = Math.max(0, Math.round((base + delta) * 100) / 100);
-    setWeight(formatWeightValue(next));
-  };
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    await addLog(exercise.id, weight === "" ? null : Number(weight), null, date);
+    const weightValue = weight === "" ? null : Number(weight);
+    const created = await addLog(exercise.id, weightValue, null, date);
 
-    onAdded();
+    onAdded({
+      id: created.id,
+      weight: weightValue,
+      reps: null,
+      date,
+    });
     onClose();
   };
 
@@ -120,35 +106,6 @@ export function LogModal({ exercise, onClose, onAdded }: Props) {
               </span>
             </div>
           </label>
-
-          <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-4 gap-2">
-              {WEIGHT_STEP_OPTIONS.map((delta) => (
-                <button
-                  key={`plus-${delta}`}
-                  type="button"
-                  className="step-adjust-plus btn btn-sm btn-soft min-w-0 flex-1 whitespace-nowrap"
-                  onClick={() => handleAdjustWeight(delta)}
-                >
-                  <StepIcon type="plus" />
-                  <span className="text-base font-semibold">{delta}</span>
-                </button>
-              ))}
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {WEIGHT_STEP_OPTIONS.map((delta) => (
-                <button
-                  key={`minus-${delta}`}
-                  type="button"
-                  className="step-adjust-minus btn btn-xs btn-soft min-w-0 flex-1 whitespace-nowrap"
-                  onClick={() => handleAdjustWeight(-delta)}
-                >
-                  <StepIcon type="minus" />
-                  <span className="text-sm font-semibold">{delta}</span>
-                </button>
-              ))}
-            </div>
-          </div>
 
           <div className="modal-action">
             <button type="button" className="btn btn-ghost" onClick={onClose}>

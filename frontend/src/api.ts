@@ -62,6 +62,20 @@ export async function fetchLogs(exerciseId: number) {
   return res.json();
 }
 
+export async function updateLog(
+  id: number,
+  weight: number | null,
+  reps: number | null,
+  date: string
+) {
+  const res = await fetch(`${BASE}/logs/entry/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ weight, reps, date }),
+  });
+  return res.json();
+}
+
 export async function deleteLog(id: number) {
   await fetch(`${BASE}/logs/entry/${id}`, { method: "DELETE" });
 }
