@@ -1,5 +1,12 @@
 import type { BodyPart, Exercise, WorkoutLog } from "./types";
-import { buildExerciseList, loadData, nextId, saveData, type StoredLog } from "./storage";
+import {
+  DEFAULT_WEIGHT_STEP,
+  buildExerciseList,
+  loadData,
+  nextId,
+  saveData,
+  type StoredLog,
+} from "./storage";
 
 export async function fetchBodyParts(): Promise<BodyPart[]> {
   const data = loadData();
@@ -10,7 +17,11 @@ export async function fetchExercises(): Promise<Exercise[]> {
   return buildExerciseList(loadData());
 }
 
-export async function addExercise(name: string, bodyPartId: number) {
+export async function addExercise(
+  name: string,
+  bodyPartId: number,
+  weightStep: number = DEFAULT_WEIGHT_STEP
+) {
   const data = loadData();
   const bodyPart = data.bodyParts.find((bp) => bp.id === bodyPartId);
   if (!bodyPart) {
@@ -21,6 +32,7 @@ export async function addExercise(name: string, bodyPartId: number) {
     id: nextId(data.exercises),
     name,
     bodyPartId,
+    weightStep,
   };
   data.exercises.push(created);
   saveData(data);
@@ -30,7 +42,18 @@ export async function addExercise(name: string, bodyPartId: number) {
     name: created.name,
     bodyPartId: created.bodyPartId,
     tag: bodyPart.name,
+    weightStep: created.weightStep,
   };
+}
+
+export async function updateExerciseWeightStep(id: number, weightStep: number) {
+  const data = loadData();
+  const target = data.exercises.find((exercise) => exercise.id === id);
+  if (!target) {
+    throw new Error("Exercise not found");
+  }
+  target.weightStep = weightStep;
+  saveData(data);
 }
 
 export async function deleteExercise(id: number) {

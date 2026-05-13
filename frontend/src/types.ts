@@ -9,6 +9,7 @@ export type Exercise = {
   name: string;
   tag: string;
   bodyPartId: number;
+  weightStep: number;
   recentLogs: WorkoutLog[];
 };
 

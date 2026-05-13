@@ -1,3 +1,4 @@
+import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { addLog } from "../api";
 import type { Exercise, WorkoutLog } from "../types";
@@ -22,6 +23,19 @@ function formatWeightValue(value: number) {
   return value.toFixed(2).replace(/\.?0+$/, "");
 }
 
+function formatStepLabel(value: number) {
+  return value.toFixed(2).replace(/\.?0+$/, "");
+}
+
+function StepIcon({ type }: { type: "plus" | "minus" }) {
+  return (
+    <Icon
+      icon={type === "plus" ? "mdi:plus-circle-outline" : "mdi:minus-circle-outline"}
+      className="size-4 shrink-0"
+    />
+  );
+}
+
 function getInitialWeight(exercise: Exercise) {
   const latestWeight = exercise.recentLogs.find((log) => log.weight != null)?.weight;
   return latestWeight != null ? formatWeightValue(latestWeight) : "";
@@ -31,6 +45,14 @@ export function LogModal({ exercise, onClose, onAdded }: Props) {
   const [date, setDate] = useState(getLocalToday());
   const [weight, setWeight] = useState(getInitialWeight(exercise));
   const recentLogs = exercise.recentLogs.slice(0, 3);
+
+  const handleAdjustWeight = (delta: number) => {
+    const base = weight === "" ? 0 : Number(weight);
+    if (Number.isNaN(base)) return;
+
+    const next = Math.max(0, Math.round((base + delta) * 100) / 100);
+    setWeight(formatWeightValue(next));
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -106,6 +128,25 @@ export function LogModal({ exercise, onClose, onAdded }: Props) {
               </span>
             </div>
           </label>
+
+          <div className="flex gap-1">
+            <button
+              type="button"
+              className="btn btn-error btn-soft min-w-0 flex-1 whitespace-nowrap"
+              onClick={() => handleAdjustWeight(-exercise.weightStep)}
+            >
+              <StepIcon type="minus" />
+              <span className="text-lg font-semibold">{formatStepLabel(exercise.weightStep)}</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-info btn-soft min-w-0 flex-1 whitespace-nowrap"
+              onClick={() => handleAdjustWeight(exercise.weightStep)}
+            >
+              <StepIcon type="plus" />
+              <span className="text-lg font-semibold">{formatStepLabel(exercise.weightStep)}</span>
+            </button>
+          </div>
 
           <div className="modal-action">
             <button type="button" className="btn btn-ghost" onClick={onClose}>

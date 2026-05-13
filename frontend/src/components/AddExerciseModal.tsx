@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { addExercise } from "../api";
+import { DEFAULT_WEIGHT_STEP } from "../storage";
 import type { BodyPart, Exercise } from "../types";
 
 type Props = {
@@ -8,9 +9,20 @@ type Props = {
   onAdded: (exercise: Exercise) => void;
 };
 
+function formatStepValue(value: number) {
+  return value.toFixed(2).replace(/\.?0+$/, "");
+}
+
+function parseStep(value: string): number | null {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return null;
+  return num;
+}
+
 export function AddExerciseModal({ bodyParts, onClose, onAdded }: Props) {
   const [name, setName] = useState("");
   const [bodyPartId, setBodyPartId] = useState<number>(bodyParts[0]?.id ?? 0);
+  const [step, setStep] = useState(formatStepValue(DEFAULT_WEIGHT_STEP));
   const hasBodyParts = bodyParts.length > 0;
 
   useEffect(() => {
@@ -25,11 +37,14 @@ export function AddExerciseModal({ bodyParts, onClose, onAdded }: Props) {
     }
   }, [bodyPartId, bodyParts, hasBodyParts]);
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!name.trim() || !bodyPartId) return;
 
-    const created = await addExercise(name.trim(), bodyPartId);
+    const parsedStep = parseStep(step);
+    if (parsedStep == null) return;
+
+    const created = await addExercise(name.trim(), bodyPartId, parsedStep);
     onAdded({ ...created, recentLogs: [] });
   };
 
@@ -59,6 +74,25 @@ export function AddExerciseModal({ bodyParts, onClose, onAdded }: Props) {
             ))}
           </select>
           {!hasBodyParts && <div className="text-sm text-error">部位マスタが未登録です</div>}
+          <label className="form-control">
+            <div className="label">
+              <span className="label-text">重量増減ステップ</span>
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="0"
+                className="input input-bordered w-full pr-10 text-right"
+                value={step}
+                onChange={(event) => setStep(event.target.value)}
+              />
+              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-base-content/60">
+                kg
+              </span>
+            </div>
+          </label>
           <div className="modal-action">
             <button type="button" className="btn" onClick={onClose}>
               閉じる

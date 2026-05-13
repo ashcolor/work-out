@@ -155,6 +155,9 @@ export default function App() {
           <ExerciseManagementPage
             exercises={exercises}
             onAddExercise={() => setShowAddExercise(true)}
+            onWeightStepChanged={(exerciseId, weightStep) =>
+              updateExercise(exerciseId, (exercise) => ({ ...exercise, weightStep }))
+            }
           />
         ) : (
           <ExerciseTable

@@ -1,7 +1,9 @@
 import type { BodyPart, Exercise, WorkoutLog } from "./types";
 
 const STORAGE_KEY = "workout-app:data";
-const DATA_VERSION = 1;
+const DATA_VERSION = 3;
+
+export const DEFAULT_WEIGHT_STEP = 2.5;
 
 export type StoredLog = {
   id: number;
@@ -15,6 +17,7 @@ export type StoredExercise = {
   id: number;
   name: string;
   bodyPartId: number;
+  weightStep: number;
 };
 
 export type AppData = {
@@ -34,21 +37,41 @@ const DEFAULT_BODY_PARTS: BodyPart[] = [
 ];
 
 const DEFAULT_EXERCISES: StoredExercise[] = [
-  { id: 1, name: "ショルダープレス", bodyPartId: 1 },
-  { id: 2, name: "ベンチプレス", bodyPartId: 2 },
-  { id: 3, name: "チェストプレス", bodyPartId: 2 },
-  { id: 4, name: "ラットプル", bodyPartId: 4 },
-  { id: 5, name: "リアフライ", bodyPartId: 4 },
-  { id: 6, name: "バックエクステンション", bodyPartId: 4 },
-  { id: 7, name: "ローイング", bodyPartId: 4 },
-  { id: 8, name: "トルソローテーション", bodyPartId: 5 },
-  { id: 9, name: "アブドミナル", bodyPartId: 5 },
-  { id: 10, name: "レッグエクステンション", bodyPartId: 6 },
-  { id: 11, name: "レッグプレス", bodyPartId: 6 },
-  { id: 12, name: "レッグカール", bodyPartId: 6 },
-  { id: 13, name: "ヒップアダクター", bodyPartId: 6 },
-  { id: 14, name: "ヒップアブダクター", bodyPartId: 6 },
+  { id: 1, name: "ショルダープレス", bodyPartId: 1, weightStep: 2.25 },
+  { id: 2, name: "ベンチプレス", bodyPartId: 2, weightStep: 2.5 },
+  { id: 3, name: "チェストプレス", bodyPartId: 2, weightStep: 2.25 },
+  { id: 4, name: "ラットプル", bodyPartId: 4, weightStep: 2.25 },
+  { id: 5, name: "リアフライ", bodyPartId: 4, weightStep: 2.25 },
+  { id: 6, name: "バックエクステンション", bodyPartId: 4, weightStep: 3.75 },
+  { id: 7, name: "ローイング", bodyPartId: 4, weightStep: 2.5 },
+  { id: 8, name: "トルソローテーション", bodyPartId: 5, weightStep: 2.25 },
+  { id: 9, name: "アブドミナル", bodyPartId: 5, weightStep: 3.75 },
+  { id: 10, name: "レッグエクステンション", bodyPartId: 6, weightStep: 2.25 },
+  { id: 11, name: "レッグプレス", bodyPartId: 6, weightStep: 4.5 },
+  { id: 12, name: "レッグカール", bodyPartId: 6, weightStep: 2.25 },
+  { id: 13, name: "ヒップアダクター", bodyPartId: 6, weightStep: 3.75 },
+  { id: 14, name: "ヒップアブダクター", bodyPartId: 6, weightStep: 3.75 },
 ];
+
+function normalizeWeightStep(value: unknown): number {
+  const num = Number(value);
+  if (Number.isFinite(num) && num > 0) return num;
+  return DEFAULT_WEIGHT_STEP;
+}
+
+function normalizeExercise(value: unknown): StoredExercise | null {
+  if (!value || typeof value !== "object") return null;
+  const v = value as Partial<StoredExercise>;
+  if (typeof v.id !== "number" || typeof v.name !== "string" || typeof v.bodyPartId !== "number") {
+    return null;
+  }
+  return {
+    id: v.id,
+    name: v.name,
+    bodyPartId: v.bodyPartId,
+    weightStep: normalizeWeightStep(v.weightStep),
+  };
+}
 
 function createInitialData(): AppData {
   return {
@@ -69,12 +92,33 @@ export function loadData(): AppData {
     }
 
     const parsed = JSON.parse(raw) as Partial<AppData>;
-    return {
-      version: parsed.version ?? DATA_VERSION,
+    const prevVersion = typeof parsed.version === "number" ? parsed.version : 1;
+    const exercises = (parsed.exercises ?? [])
+      .map(normalizeExercise)
+      .filter((exercise): exercise is StoredExercise => exercise !== null);
+
+    if (prevVersion < 3) {
+      const defaultStepByName = new Map(DEFAULT_EXERCISES.map((e) => [e.name, e.weightStep]));
+      for (const exercise of exercises) {
+        const defaultStep = defaultStepByName.get(exercise.name);
+        if (defaultStep != null) {
+          exercise.weightStep = defaultStep;
+        }
+      }
+    }
+
+    const data: AppData = {
+      version: DATA_VERSION,
       bodyParts: parsed.bodyParts ?? [],
-      exercises: parsed.exercises ?? [],
+      exercises,
       logs: parsed.logs ?? [],
     };
+
+    if (prevVersion < DATA_VERSION) {
+      saveData(data);
+    }
+
+    return data;
   } catch {
     const initial = createInitialData();
     saveData(initial);
@@ -87,10 +131,13 @@ export function saveData(data: AppData) {
 }
 
 export function replaceData(data: AppData) {
+  const exercises = (data.exercises ?? [])
+    .map(normalizeExercise)
+    .filter((exercise): exercise is StoredExercise => exercise !== null);
   saveData({
     version: DATA_VERSION,
     bodyParts: data.bodyParts ?? [],
-    exercises: data.exercises ?? [],
+    exercises,
     logs: data.logs ?? [],
   });
 }
@@ -142,6 +189,7 @@ export function buildExerciseList(data: AppData): Exercise[] {
         name: exercise.name,
         tag: bodyPart?.name ?? "",
         bodyPartId: exercise.bodyPartId,
+        weightStep: exercise.weightStep,
         recentLogs: logs,
       };
     });
