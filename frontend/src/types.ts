@@ -10,6 +10,7 @@ export type Exercise = {
   tag: string;
   bodyPartId: number;
   weightStep: number;
+  sortOrder: number;
   recentLogs: WorkoutLog[];
 };
 

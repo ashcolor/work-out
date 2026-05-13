@@ -2,10 +2,9 @@ import { Icon } from "@iconify/react";
 
 type Props = {
   onMenuOpen: () => void;
-  onOpenExercises: () => void;
 };
 
-export function AppHeader({ onMenuOpen, onOpenExercises }: Props) {
+export function AppHeader({ onMenuOpen }: Props) {
   return (
     <header className="navbar border-b border-base-300 bg-base-100 shadow-sm">
       <div className="flex-none">
@@ -20,15 +19,6 @@ export function AppHeader({ onMenuOpen, onOpenExercises }: Props) {
       </div>
       <div className="flex-1">
         <div className="text-lg font-bold">筋トレ記録</div>
-      </div>
-      <div className="flex-none">
-        <button
-          type="button"
-          className="btn btn-primary btn-sm hidden sm:inline-flex"
-          onClick={onOpenExercises}
-        >
-          種目追加
-        </button>
       </div>
     </header>
   );

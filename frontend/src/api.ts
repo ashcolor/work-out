@@ -28,11 +28,16 @@ export async function addExercise(
     throw new Error("Invalid body part");
   }
 
+  const maxSortOrder = data.exercises
+    .filter((exercise) => exercise.bodyPartId === bodyPartId)
+    .reduce((max, exercise) => (exercise.sortOrder > max ? exercise.sortOrder : max), 0);
+
   const created = {
     id: nextId(data.exercises),
     name,
     bodyPartId,
     weightStep,
+    sortOrder: maxSortOrder + 1,
   };
   data.exercises.push(created);
   saveData(data);
@@ -43,6 +48,7 @@ export async function addExercise(
     bodyPartId: created.bodyPartId,
     tag: bodyPart.name,
     weightStep: created.weightStep,
+    sortOrder: created.sortOrder,
   };
 }
 
@@ -54,6 +60,62 @@ export async function updateExerciseWeightStep(id: number, weightStep: number) {
   }
   target.weightStep = weightStep;
   saveData(data);
+}
+
+export async function updateExerciseName(id: number, name: string) {
+  const data = loadData();
+  const target = data.exercises.find((exercise) => exercise.id === id);
+  if (!target) {
+    throw new Error("Exercise not found");
+  }
+  target.name = name;
+  saveData(data);
+}
+
+export async function updateBodyPartName(id: number, name: string) {
+  const data = loadData();
+  const target = data.bodyParts.find((bp) => bp.id === id);
+  if (!target) {
+    throw new Error("Body part not found");
+  }
+  target.name = name;
+  saveData(data);
+}
+
+export async function reorderBodyParts(orderedIds: number[]) {
+  const data = loadData();
+  const byId = new Map(data.bodyParts.map((bp) => [bp.id, bp]));
+  orderedIds.forEach((id, index) => {
+    const target = byId.get(id);
+    if (target) target.sortOrder = index + 1;
+  });
+  saveData(data);
+}
+
+export async function reorderExercises(orderedIds: number[]) {
+  const data = loadData();
+  const byId = new Map(data.exercises.map((exercise) => [exercise.id, exercise]));
+  orderedIds.forEach((id, index) => {
+    const target = byId.get(id);
+    if (target) target.sortOrder = index + 1;
+  });
+  saveData(data);
+}
+
+export async function addBodyPart(name: string): Promise<BodyPart> {
+  const data = loadData();
+  const maxSortOrder = data.bodyParts.reduce(
+    (max, bp) => (bp.sortOrder > max ? bp.sortOrder : max),
+    0
+  );
+  const created: BodyPart = {
+    id: nextId(data.bodyParts),
+    name,
+    sortOrder: maxSortOrder + 1,
+  };
+  data.bodyParts.push(created);
+  saveData(data);
+  return created;
 }
 
 export async function deleteExercise(id: number) {

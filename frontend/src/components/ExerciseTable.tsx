@@ -1,9 +1,7 @@
 import { Icon } from "@iconify/react";
 import type { KeyboardEvent } from "react";
 import type { Exercise, WorkoutLog } from "../types";
-import { SectionLabel } from "./SectionLabel";
 import { formatRelativeDate } from "../utils/formatRelativeDate";
-import { formatWeight } from "../utils/formatWeight";
 import { groupExercisesByTag } from "../utils/groupExercisesByTag";
 
 type Props = {
@@ -31,54 +29,43 @@ export function ExerciseTable({ exercises, onLog, onHistory }: Props) {
   const groups = groupExercisesByTag(exercises);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
       {groups.map((group) => (
-        <section key={group.tag} className="w-full space-y-3">
-          <SectionLabel label={group.tag} />
+        <section key={group.tag} className="w-full">
+          <span>{group.tag}</span>
 
-          <div className="flex w-full max-w-5xl flex-row flex-wrap gap-3">
+          <div className="flex w-full flex-col gap-2">
             {group.exercises.map((exercise) => {
               const latestLog = getLatestLog(exercise);
 
               return (
-                <article
-                  key={exercise.id}
-                  role="button"
-                  tabIndex={0}
-                  className="group relative flex min-h-[76px] min-w-[150px] basis-[170px] cursor-pointer flex-col justify-between rounded-2xl border border-base-300 bg-base-100 p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  onClick={() => onHistory(exercise)}
-                  onKeyDown={(event) => handleCardKeyDown(event, exercise, onHistory)}
-                >
+                <div key={exercise.id} className="join w-full shadow-sm">
+                  <article
+                    role="button"
+                    tabIndex={0}
+                    className="join-item group flex flex-1 cursor-pointer items-center gap-3 border border-base-300 bg-base-100 p-3 text-left transition hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    onClick={() => onHistory(exercise)}
+                    onKeyDown={(event) => handleCardKeyDown(event, exercise, onHistory)}
+                  >
+                    <h3 className="min-w-0 flex-1 truncate text-base font-semibold leading-snug text-base-content">
+                      {exercise.name}
+                    </h3>
+
+                    <span className="shrink-0 text-xs text-base-content/55">
+                      {latestLog ? formatRelativeDate(latestLog.date) : "記録なし"}
+                    </span>
+                  </article>
+
                   <button
                     type="button"
-                    className="btn btn-ghost btn-sm btn-circle absolute right-2 top-2 h-8 min-h-8 w-8 opacity-70 transition group-hover:opacity-100"
+                    className="btn join-item h-auto min-h-0 self-stretch border border-base-300 bg-base-100 px-4 hover:border-primary/30"
                     aria-label={`${exercise.name}を記録`}
                     title="新規記録"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onLog(exercise);
-                    }}
+                    onClick={() => onLog(exercise)}
                   >
-                    <Icon icon="lucide:square-pen" className="size-[18px]" />
+                    <Icon icon="lucide:square-pen" className="size-4.5" />
                   </button>
-
-                  <div className="w-full pr-10">
-                    <h2 className="text-base font-semibold leading-snug text-base-content">
-                      {exercise.name}
-                    </h2>
-                  </div>
-
-                  {latestLog ? (
-                    <div className="flex w-full items-center gap-2 text-xs text-base-content/55">
-                      <span>{formatRelativeDate(latestLog.date)}</span>
-                      <span className="text-[11px] text-base-content/45">
-                        {formatWeight(latestLog.weight)}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="w-full text-xs text-base-content/45">記録なし</div>
-                  )}
-                </article>
+                </div>
               );
             })}
           </div>

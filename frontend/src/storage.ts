@@ -1,7 +1,7 @@
 import type { BodyPart, Exercise, WorkoutLog } from "./types";
 
 const STORAGE_KEY = "workout-app:data";
-const DATA_VERSION = 3;
+const DATA_VERSION = 4;
 
 export const DEFAULT_WEIGHT_STEP = 2.5;
 
@@ -18,6 +18,7 @@ export type StoredExercise = {
   name: string;
   bodyPartId: number;
   weightStep: number;
+  sortOrder: number;
 };
 
 export type AppData = {
@@ -37,20 +38,20 @@ const DEFAULT_BODY_PARTS: BodyPart[] = [
 ];
 
 const DEFAULT_EXERCISES: StoredExercise[] = [
-  { id: 1, name: "ショルダープレス", bodyPartId: 1, weightStep: 2.25 },
-  { id: 2, name: "ベンチプレス", bodyPartId: 2, weightStep: 2.5 },
-  { id: 3, name: "チェストプレス", bodyPartId: 2, weightStep: 2.25 },
-  { id: 4, name: "ラットプル", bodyPartId: 4, weightStep: 2.25 },
-  { id: 5, name: "リアフライ", bodyPartId: 4, weightStep: 2.25 },
-  { id: 6, name: "バックエクステンション", bodyPartId: 4, weightStep: 3.75 },
-  { id: 7, name: "ローイング", bodyPartId: 4, weightStep: 2.5 },
-  { id: 8, name: "トルソローテーション", bodyPartId: 5, weightStep: 2.25 },
-  { id: 9, name: "アブドミナル", bodyPartId: 5, weightStep: 3.75 },
-  { id: 10, name: "レッグエクステンション", bodyPartId: 6, weightStep: 2.25 },
-  { id: 11, name: "レッグプレス", bodyPartId: 6, weightStep: 4.5 },
-  { id: 12, name: "レッグカール", bodyPartId: 6, weightStep: 2.25 },
-  { id: 13, name: "ヒップアダクター", bodyPartId: 6, weightStep: 3.75 },
-  { id: 14, name: "ヒップアブダクター", bodyPartId: 6, weightStep: 3.75 },
+  { id: 1, name: "ショルダープレス", bodyPartId: 1, weightStep: 2.25, sortOrder: 1 },
+  { id: 2, name: "ベンチプレス", bodyPartId: 2, weightStep: 2.5, sortOrder: 1 },
+  { id: 3, name: "チェストプレス", bodyPartId: 2, weightStep: 2.25, sortOrder: 2 },
+  { id: 4, name: "ラットプル", bodyPartId: 4, weightStep: 2.25, sortOrder: 1 },
+  { id: 5, name: "リアフライ", bodyPartId: 4, weightStep: 2.25, sortOrder: 2 },
+  { id: 6, name: "バックエクステンション", bodyPartId: 4, weightStep: 3.75, sortOrder: 3 },
+  { id: 7, name: "ローイング", bodyPartId: 4, weightStep: 2.5, sortOrder: 4 },
+  { id: 8, name: "トルソローテーション", bodyPartId: 5, weightStep: 2.25, sortOrder: 1 },
+  { id: 9, name: "アブドミナル", bodyPartId: 5, weightStep: 3.75, sortOrder: 2 },
+  { id: 10, name: "レッグエクステンション", bodyPartId: 6, weightStep: 2.25, sortOrder: 1 },
+  { id: 11, name: "レッグプレス", bodyPartId: 6, weightStep: 4.5, sortOrder: 2 },
+  { id: 12, name: "レッグカール", bodyPartId: 6, weightStep: 2.25, sortOrder: 3 },
+  { id: 13, name: "ヒップアダクター", bodyPartId: 6, weightStep: 3.75, sortOrder: 4 },
+  { id: 14, name: "ヒップアブダクター", bodyPartId: 6, weightStep: 3.75, sortOrder: 5 },
 ];
 
 function normalizeWeightStep(value: unknown): number {
@@ -70,7 +71,25 @@ function normalizeExercise(value: unknown): StoredExercise | null {
     name: v.name,
     bodyPartId: v.bodyPartId,
     weightStep: normalizeWeightStep(v.weightStep),
+    sortOrder: typeof v.sortOrder === "number" ? v.sortOrder : 0,
   };
+}
+
+function assignInitialExerciseSortOrder(exercises: StoredExercise[]) {
+  const byBodyPart = new Map<number, StoredExercise[]>();
+  for (const exercise of exercises) {
+    const list = byBodyPart.get(exercise.bodyPartId);
+    if (list) list.push(exercise);
+    else byBodyPart.set(exercise.bodyPartId, [exercise]);
+  }
+  for (const list of byBodyPart.values()) {
+    list
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name, "ja"))
+      .forEach((exercise, index) => {
+        exercise.sortOrder = index + 1;
+      });
+  }
 }
 
 function createInitialData(): AppData {
@@ -105,6 +124,10 @@ export function loadData(): AppData {
           exercise.weightStep = defaultStep;
         }
       }
+    }
+
+    if (prevVersion < 4) {
+      assignInitialExerciseSortOrder(exercises);
     }
 
     const data: AppData = {
@@ -165,6 +188,7 @@ export function buildExerciseList(data: AppData): Exercise[] {
       const orderA = sortOrderByBodyPartId.get(a.bodyPartId) ?? Number.MAX_SAFE_INTEGER;
       const orderB = sortOrderByBodyPartId.get(b.bodyPartId) ?? Number.MAX_SAFE_INTEGER;
       if (orderA !== orderB) return orderA - orderB;
+      if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
       return a.name.localeCompare(b.name, "ja");
     })
     .map((exercise) => {
@@ -190,6 +214,7 @@ export function buildExerciseList(data: AppData): Exercise[] {
         tag: bodyPart?.name ?? "",
         bodyPartId: exercise.bodyPartId,
         weightStep: exercise.weightStep,
+        sortOrder: exercise.sortOrder,
         recentLogs: logs,
       };
     });
