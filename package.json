@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "cd frontend && npm run dev",
-    "build": "cd frontend && npm run build",
-    "deploy": "npm run build && wrangler pages deploy frontend/dist"
+    "dev": "cd frontend && pnpm run dev",
+    "build": "cd frontend && pnpm run build",
+    "deploy": "pnpm run build && wrangler pages deploy frontend/dist"
   },
   "keywords": [],
   "author": "",
