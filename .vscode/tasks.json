@@ -2,26 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "api server",
-      "type": "shell",
-      "command": "npm run dev -- --port 8788",
-      "isBackground": true,
-      "problemMatcher": [],
-      "runOptions": {
-        "runOn": "folderOpen"
-      },
-      "presentation": {
-        "reveal": "always",
-        "focus": false,
-        "panel": "dedicated",
-        "clear": false,
-        "showReuseMessage": false
-      }
-    },
-    {
       "label": "frontend dev server",
       "type": "shell",
-      "command": "npm run dev -- --host 0.0.0.0 --port 3008",
+      "command": "pnpm run dev -- --host 0.0.0.0 --port 3008",
       "isBackground": true,
       "problemMatcher": [],
       "options": {
