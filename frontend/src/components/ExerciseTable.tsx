@@ -14,6 +14,19 @@ function getLatestLog(exercise: Exercise): WorkoutLog | null {
   return exercise.recentLogs[0] ?? null;
 }
 
+function getTodayString() {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, "0");
+  const d = String(today.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function isLoggedToday(exercise: Exercise): boolean {
+  const latest = getLatestLog(exercise);
+  return latest?.date === getTodayString();
+}
+
 function handleCardKeyDown(
   event: KeyboardEvent<HTMLElement>,
   exercise: Exercise,
@@ -37,28 +50,29 @@ export function ExerciseTable({ exercises, onLog, onHistory }: Props) {
           <div className="flex w-full flex-col gap-2">
             {group.exercises.map((exercise) => {
               const latestLog = getLatestLog(exercise);
+              const doneToday = isLoggedToday(exercise);
 
               return (
                 <div key={exercise.id} className="join w-full shadow-sm">
                   <article
                     role="button"
                     tabIndex={0}
-                    className="join-item group flex flex-1 cursor-pointer items-center gap-3 border border-base-300 bg-base-100 p-3 text-left transition hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className={`join-item group flex flex-1 cursor-pointer items-center gap-3 border border-base-300 p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-primary/30 ${doneToday ? "bg-base-200 hover:border-base-300" : "bg-base-100 hover:border-primary/30"}`}
                     onClick={() => onHistory(exercise)}
                     onKeyDown={(event) => handleCardKeyDown(event, exercise, onHistory)}
                   >
-                    <h3 className="min-w-0 flex-1 truncate text-base font-semibold leading-snug text-base-content">
+                    <h3 className={`min-w-0 flex-1 truncate text-base font-semibold leading-snug ${doneToday ? "text-base-content/40 line-through" : "text-base-content"}`}>
                       {exercise.name}
                     </h3>
 
-                    <span className="shrink-0 text-xs text-base-content/55">
+                    <span className={`shrink-0 text-xs ${doneToday ? "text-base-content/30" : "text-base-content/55"}`}>
                       {latestLog ? formatRelativeDate(latestLog.date) : "記録なし"}
                     </span>
                   </article>
 
                   <button
                     type="button"
-                    className="btn join-item h-auto min-h-0 self-stretch border border-base-300 bg-base-100 px-4 hover:border-primary/30"
+                    className={`btn join-item h-auto min-h-0 self-stretch border border-base-300 px-4 ${doneToday ? "bg-base-200 hover:border-base-300 text-base-content/40" : "bg-base-100 hover:border-primary/30"}`}
                     aria-label={`${exercise.name}を記録`}
                     title="新規記録"
                     onClick={() => onLog(exercise)}
