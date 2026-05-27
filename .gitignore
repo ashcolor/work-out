@@ -4,3 +4,4 @@ dist/
 *.log
 backups/
 workout-backup*.json
+package-lock.json
